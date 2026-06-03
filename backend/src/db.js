@@ -2,9 +2,17 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const socketPath = process.env.DB_SOCKET || '/tmp/mysql.sock';
+const connectionConfig = process.env.DB_HOST
+  ? {
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT) || 3306,
+    }
+  : {
+      socketPath: process.env.DB_SOCKET || '/tmp/mysql.sock',
+    };
+
 export const pool = mysql.createPool({
-  socketPath,
+  ...connectionConfig,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'rehab_rise',
