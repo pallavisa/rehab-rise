@@ -1,0 +1,351 @@
+<!-- ===================== NAV ===================== -->
+<header [style.background]="scrolled ? 'color-mix(in srgb,var(--bg) 88%,transparent)' : 'transparent'"
+        [style.backdrop-filter]="scrolled ? 'saturate(140%) blur(12px)' : 'none'"
+        [style.border-bottom]="scrolled ? '1px solid var(--line)' : '1px solid transparent'"
+        style="position:sticky;top:0;z-index:50;transition:background .25s ease,border-color .25s ease;">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:76px;">
+    <a href="#top" (click)="scrollTop($event)" style="text-decoration:none;">
+      <ng-container [ngTemplateOutlet]="logo"></ng-container>
+    </a>
+    <nav class="nav-links" style="display:flex;align-items:center;gap:30px;">
+      <button *ngFor="let l of navLinks" (click)="go(l.id)" style="background:none;border:none;cursor:pointer;
+              font-family:inherit;font-size:15.5px;font-weight:500;color:var(--ink-soft);padding:0;">{{ l.label }}</button>
+    </nav>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:12px;">
+      <button (click)="login = true" class="nav-login" style="background:none;border:none;cursor:pointer;
+              font-family:inherit;font-size:15.5px;font-weight:600;color:var(--ink);padding:8px 4px;">Log in</button>
+      <button (click)="booking = true" [ngStyle]="primaryBtn('sm')">Book free call<app-icon name="arrow" [size]="17"/></button>
+    </div>
+    <button class="nav-burger" (click)="navOpen = !navOpen" aria-label="Menu"
+            style="display:none;background:none;border:1px solid var(--line);border-radius:9px;width:42px;height:42px;
+            cursor:pointer;color:var(--ink);align-items:center;justify-content:center;">
+      <app-icon [name]="navOpen ? 'close' : 'spark'" [size]="20"/>
+    </button>
+  </div>
+  <div *ngIf="navOpen" class="nav-mobile" style="border-top:1px solid var(--line);background:var(--bg);padding:14px 0 22px;">
+    <div class="container" style="display:flex;flex-direction:column;gap:4px;">
+      <button *ngFor="let l of navLinks" (click)="go(l.id)" style="background:none;border:none;text-align:left;
+              padding:13px 4px;font-family:inherit;font-size:18px;font-weight:500;color:var(--ink);cursor:pointer;
+              border-bottom:1px solid var(--line);">{{ l.label }}</button>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button (click)="navOpen=false; login=true" [ngStyle]="outlineBtn()" style="flex:1;">Log in</button>
+        <button (click)="navOpen=false; booking=true" [ngStyle]="primaryBtn('md')" style="flex:1;">Book free call</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ===================== HERO ===================== -->
+  <section id="top" style="position:relative;overflow:hidden;">
+    <div class="container hero-grid" style="display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+         padding:clamp(40px,7vw,88px) 0 clamp(56px,8vw,96px);">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px 7px 8px;border-radius:var(--radius-pill);
+             background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500;color:var(--ink-soft);">
+          <span style="background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:3px 9px;font-weight:600;font-size:12.5px;">Online</span>
+          Rehab · Strength · Nutrition — one coach
+        </div>
+        <h1 class="display" style="font-size:clamp(38px,5.4vw,62px);line-height:1.06;letter-spacing:-.03em;
+            margin:26px 0 0;color:var(--ink);max-width:560px;">
+          Recover stronger.<br>Then keep <span style="color:var(--accent);font-style:italic;">rising</span>.
+        </h1>
+        <p style="font-size:clamp(17px,1.9vw,20px);line-height:1.55;color:var(--ink-soft);margin:24px 0 0;max-width:500px;">
+          Personalised online rehabilitation, training, and nutrition from one specialist who actually follows your progress — week after week.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:13px;margin-top:34px;">
+          <button (click)="booking = true" [ngStyle]="primaryBtn('lg')">Book a free 15-min call<app-icon name="arrow" [size]="19"/></button>
+          <button (click)="go('programs')" [ngStyle]="outlineBtn('lg')">See the programs</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:22px;margin-top:36px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;">
+            <span *ngFor="let i of [0,1,2,3]" [style.margin-left]="i ? '-12px' : '0'"
+                  style="width:38px;height:38px;border-radius:999px;border:2px solid var(--bg);background:var(--surface-2);
+                  display:grid;place-items:center;color:var(--ink-soft);"><app-icon name="user" [size]="18"/></span>
+          </div>
+          <div style="font-size:14.5px;color:var(--ink-soft);line-height:1.4;">
+            <strong style="color:var(--ink);">320+ clients</strong> guided back to<br>doing what they love.
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <ng-container [ngTemplateOutlet]="imgPlaceholder"
+          [ngTemplateOutletContext]="{label:'hero — coaching session photo', ratio:'4 / 5'}"></ng-container>
+        <div style="position:absolute;left:-18px;bottom:28px;background:var(--surface);border:1px solid var(--line);
+             border-radius:var(--radius-md);padding:16px 18px;box-shadow:0 18px 40px -22px rgba(0,0,0,.32);
+             display:flex;gap:13px;align-items:center;max-width:250px;">
+          <span style="width:42px;height:42px;border-radius:11px;background:var(--primary-soft);color:var(--primary);
+                display:grid;place-items:center;flex:0 0 auto;"><app-icon name="video" [size]="21"/></span>
+          <div style="font-size:13.5px;line-height:1.35;color:var(--ink-soft);">
+            <strong style="color:var(--ink);display:block;font-size:14.5px;">Live video sessions</strong>
+            Google Meet link sent the moment you book.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TRUST STRIP ===================== -->
+  <section style="border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);">
+    <div class="container trust-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:26px 0;">
+      <div *ngFor="let it of trustItems" style="display:flex;align-items:center;gap:12px;">
+        <span style="color:var(--accent);flex:0 0 auto;"><app-icon [name]="it.icon" [size]="22"/></span>
+        <span style="font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.3;">{{ it.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROGRAMS ===================== -->
+  <section id="programs" style="padding:clamp(64px,9vw,110px) 0;">
+    <div class="container">
+      <div style="max-width:640px;margin:0 auto;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:18px;"><ng-container [ngTemplateOutlet]="eyebrow" [ngTemplateOutletContext]="{text:'Programs'}"></ng-container></div>
+        <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin:0;">Choose where you want to start</h2>
+        <p style="margin:18px auto 0;font-size:18px;line-height:1.6;color:var(--ink-soft);max-width:640px;">Every program is built around you — your history, your goals, your schedule. Start with one, or combine them for a complete reset.</p>
+      </div>
+
+      <div class="programs-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px;">
+        <div *ngFor="let p of cards" class="program-card"
+             [style.background]="p.accent ? 'var(--primary)' : 'var(--surface)'"
+             [style.color]="p.accent ? 'var(--primary-ink)' : 'var(--ink)'"
+             [style.border]="'1px solid ' + (p.accent ? 'transparent' : 'var(--line)')"
+             [style.box-shadow]="p.accent ? '0 24px 50px -28px rgba(0,0,0,.5)' : '0 1px 2px rgba(0,0,0,.03)'"
+             style="border-radius:var(--radius-lg);padding:30px 28px;display:flex;flex-direction:column;position:relative;">
+          <span *ngIf="p.accent" style="position:absolute;top:22px;right:22px;font-size:12px;font-weight:600;
+                letter-spacing:.08em;text-transform:uppercase;color:var(--accent);">Most popular</span>
+          <span [style.background]="p.accent ? 'rgba(255,255,255,.12)' : 'var(--surface-2)'"
+                [style.color]="p.accent ? 'var(--accent-ink)' : 'var(--accent)'"
+                style="width:50px;height:50px;border-radius:13px;display:grid;place-items:center;margin-bottom:22px;">
+            <app-icon [name]="iconFor[p.id] || 'spark'" [size]="25"/>
+          </span>
+          <div [style.color]="p.accent ? 'rgba(255,255,255,.6)' : 'var(--ink-soft)'"
+               style="font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">{{ p.tag }}</div>
+          <h3 class="display" style="font-size:25px;margin:7px 0 0;letter-spacing:-.01em;line-height:1.1;">{{ p.name }}</h3>
+          <div style="display:flex;align-items:baseline;gap:5px;margin:16px 0 14px;">
+            <span class="display" style="font-size:38px;font-weight:600;letter-spacing:-.02em;">£{{ p.price }}</span>
+            <span [style.color]="p.accent ? 'rgba(255,255,255,.65)' : 'var(--ink-soft)'" style="font-size:14.5px;">{{ p.cadence }}</span>
+          </div>
+          <p [style.color]="p.accent ? 'rgba(255,255,255,.8)' : 'var(--ink-soft)'" style="font-size:15px;line-height:1.55;margin:0;">{{ p.summary }}</p>
+          <ul style="list-style:none;padding:0;margin:22px 0 28px;display:flex;flex-direction:column;gap:11px;">
+            <li *ngFor="let f of p.features" style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.4;">
+              <span style="color:var(--accent);flex:0 0 auto;margin-top:1px;"><app-icon name="check" [size]="18" [stroke]="2"/></span>
+              <span [style.color]="p.accent ? 'rgba(255,255,255,.92)' : 'var(--ink)'">{{ f }}</span>
+            </li>
+          </ul>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;align-items:center;">
+            <button (click)="openCheckout(p)" [ngStyle]="p.accent ? primaryBtn('md') : darkBtn()" style="width:100%;">Subscribe</button>
+            <button (click)="booking = true" [style.color]="p.accent ? 'rgba(255,255,255,.72)' : 'var(--ink-soft)'"
+                    style="background:none;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:500;
+                    text-decoration:underline;text-underline-offset:3px;padding:0;">or book a free call first</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="bundle as b" class="bundle" style="margin-top:22px;background:var(--accent-soft);
+           border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:var(--radius-lg);
+           padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:20px;">
+          <span style="width:52px;height:52px;border-radius:13px;background:var(--accent);color:var(--accent-ink);
+                display:grid;place-items:center;flex:0 0 auto;"><app-icon name="spark" [size]="26"/></span>
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <h3 class="display" style="font-size:23px;margin:0;color:var(--ink);">{{ b.name }}</h3>
+              <span style="font-size:12.5px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 10px;">{{ b.saving }}</span>
+            </div>
+            <p style="margin:6px 0 0;font-size:15px;color:var(--ink-soft);max-width:460px;line-height:1.5;">{{ b.summary }}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:22px;">
+          <div style="text-align:right;">
+            <span class="display" style="font-size:34px;font-weight:600;color:var(--ink);">£{{ b.price }}</span>
+            <span style="font-size:14px;color:var(--ink-soft);"> {{ b.cadence }}</span>
+          </div>
+          <button (click)="openCheckout(b)" [ngStyle]="primaryBtn('md')">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how" style="background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(64px,9vw,110px) 0;">
+    <div class="container">
+      <div style="max-width:640px;">
+        <div style="display:flex;margin-bottom:18px;"><ng-container [ngTemplateOutlet]="eyebrow" [ngTemplateOutletContext]="{text:'How it works'}"></ng-container></div>
+        <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin:0;">Four steps from stuck to strong</h2>
+        <p style="margin:18px 0 0;font-size:18px;line-height:1.6;color:var(--ink-soft);max-width:560px;">No confusing onboarding. Just a clear path, with a real person alongside you the whole way.</p>
+      </div>
+      <div class="steps-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:52px;">
+        <div *ngFor="let s of steps" style="border-top:2px solid var(--line);padding-top:20px;height:100%;">
+          <div class="display" style="font-size:15px;font-weight:700;color:var(--accent);letter-spacing:.08em;">{{ s.n }}</div>
+          <h3 class="display" style="font-size:21px;margin:14px 0 10px;color:var(--ink);letter-spacing:-.01em;line-height:1.15;">{{ s.title }}</h3>
+          <p style="font-size:15px;line-height:1.55;color:var(--ink-soft);margin:0;">{{ s.body }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ABOUT ===================== -->
+  <section id="about" style="padding:clamp(64px,9vw,110px) 0;">
+    <div class="container about-grid" style="display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center;">
+      <div style="position:relative;">
+        <ng-container [ngTemplateOutlet]="imgPlaceholder"
+          [ngTemplateOutletContext]="{label:'about — practitioner portrait', ratio:'4 / 5'}"></ng-container>
+        <div style="position:absolute;right:-16px;top:30px;background:var(--surface);border:1px solid var(--line);
+             border-radius:var(--radius-md);padding:14px 18px;box-shadow:0 18px 40px -24px rgba(0,0,0,.3);">
+          <div class="display" style="font-size:30px;font-weight:600;color:var(--accent);line-height:1;">9 yrs</div>
+          <div style="font-size:13px;color:var(--ink-soft);margin-top:3px;">helping people<br>recover &amp; rise</div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;margin-bottom:18px;"><ng-container [ngTemplateOutlet]="eyebrow" [ngTemplateOutletContext]="{text:'Your coach'}"></ng-container></div>
+        <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin:0;">One specialist. The whole journey.</h2>
+        <p style="margin:18px 0 0;font-size:18px;line-height:1.6;color:var(--ink-soft);max-width:560px;">Most people get passed between a physio, a trainer, and a nutritionist who never talk to each other. I do all three — so your rehab, your training, and your nutrition finally pull in the same direction.</p>
+        <p style="font-size:16px;line-height:1.65;color:var(--ink-soft);margin-top:18px;">I started Rehab &amp; Rise after years in clinics watching people get discharged the moment they were "fine" — never quite getting back to strong. This is the support I wished I could give them: continuous, personal, and genuinely yours.</p>
+        <div class="creds-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px;">
+          <div *ngFor="let c of creds" style="display:flex;gap:10px;align-items:center;font-size:14.5px;color:var(--ink);">
+            <span style="color:var(--accent);flex:0 0 auto;"><app-icon name="check" [size]="18" [stroke]="2"/></span>{{ c }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TESTIMONIALS ===================== -->
+  <section id="stories" style="background:var(--primary);color:var(--primary-ink);padding:clamp(64px,9vw,110px) 0;">
+    <div class="container">
+      <div style="max-width:640px;margin:0 auto;text-align:center;">
+        <div style="display:flex;justify-content:center;margin-bottom:18px;"><ng-container [ngTemplateOutlet]="eyebrow" [ngTemplateOutletContext]="{text:'Client stories'}"></ng-container></div>
+        <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--primary-ink);margin:0;">Real people, back to their best</h2>
+        <p style="margin:18px auto 0;font-size:18px;line-height:1.6;color:rgba(255,255,255,.78);max-width:640px;">A few of the people who trusted the process — and rose.</p>
+      </div>
+      <div class="stories-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;">
+        <figure *ngFor="let t of testimonials" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);
+                border-radius:var(--radius-lg);padding:28px 26px;margin:0;height:100%;display:flex;flex-direction:column;">
+          <div class="display" style="font-size:44px;line-height:.6;color:var(--accent);margin-bottom:14px;">&ldquo;</div>
+          <blockquote style="margin:0;font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.92);">{{ t.quote }}</blockquote>
+          <figcaption style="margin-top:auto;padding-top:22px;display:flex;align-items:center;gap:12px;">
+            <span style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.12);display:grid;place-items:center;"><app-icon name="user" [size]="19"/></span>
+            <span style="line-height:1.3;">
+              <strong style="display:block;font-size:15px;">{{ t.name }}</strong>
+              <span style="font-size:13.5px;color:rgba(255,255,255,.6);">{{ t.detail }}</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section style="padding:clamp(64px,9vw,110px) 0;">
+    <div class="container faq-grid" style="display:grid;grid-template-columns:.7fr 1.3fr;gap:56px;align-items:start;">
+      <div>
+        <div style="display:flex;margin-bottom:18px;"><ng-container [ngTemplateOutlet]="eyebrow" [ngTemplateOutletContext]="{text:'Questions'}"></ng-container></div>
+        <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin:0;">Good to know</h2>
+      </div>
+      <div>
+        <div *ngFor="let f of faqs; let i = index" style="border-bottom:1px solid var(--line);">
+          <button (click)="toggleFaq(i)" style="width:100%;display:flex;align-items:center;justify-content:space-between;
+                  gap:16px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;padding:22px 0;color:var(--ink);">
+            <span class="display" style="font-size:19px;font-weight:500;letter-spacing:-.01em;">{{ f.q }}</span>
+            <span [style.transform]="openFaq === i ? 'rotate(45deg)' : 'none'"
+                  style="flex:0 0 auto;color:var(--accent);transition:transform .25s ease;"><app-icon name="spark" [size]="20"/></span>
+          </button>
+          <div [style.max-height]="openFaq === i ? '220px' : '0'" style="overflow:hidden;transition:max-height .35s ease;">
+            <p style="margin:0;padding:0 0 24px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:620px;">{{ f.a }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FINAL CTA ===================== -->
+  <section style="padding:0 0 clamp(64px,9vw,110px);">
+    <div class="container">
+      <div class="cta-block" style="background:var(--primary);color:var(--primary-ink);border-radius:var(--radius-xl);
+           padding:clamp(40px,6vw,72px);position:relative;overflow:hidden;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;">
+        <div>
+          <h2 class="display" style="font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;color:var(--primary-ink);margin:0;">Your first step costs nothing but 15 minutes.</h2>
+          <p style="font-size:18px;line-height:1.6;color:rgba(255,255,255,.8);margin:20px 0 32px;max-width:520px;">Book a free call, tell me what you're working through, and leave with a clear sense of what's possible. A Google Meet link lands in your inbox instantly.</p>
+          <button (click)="booking = true" [ngStyle]="primaryBtn('lg')">Book my free 15-min call<app-icon name="arrow" [size]="19"/></button>
+        </div>
+        <div class="cta-art" style="position:relative;min-height:220px;">
+          <ng-container [ngTemplateOutlet]="imgPlaceholder"
+            [ngTemplateOutletContext]="{label:'motion / lifestyle photo', ratio:'1 / 1', dark:true}"></ng-container>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer style="background:var(--surface);border-top:1px solid var(--line);padding:56px 0 40px;">
+  <div class="container footer-grid" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;">
+    <div>
+      <ng-container [ngTemplateOutlet]="logo"></ng-container>
+      <p style="font-size:14.5px;line-height:1.6;color:var(--ink-soft);margin:18px 0 0;max-width:280px;">Online rehabilitation, strength, and nutrition coaching — guided by one specialist who follows your whole journey.</p>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);">Programs</div>
+      <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px;">
+        <a *ngFor="let l of ['Recovery Rehab','Strength & Movement','Nutrition Reset','The Full Reset']" href="#programs"
+           (click)="$event.preventDefault(); go('programs')" style="font-size:14.5px;color:var(--ink-soft);text-decoration:none;">{{ l }}</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);">Company</div>
+      <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px;">
+        <a *ngFor="let l of ['About','Client stories','FAQ','Contact']" href="#" (click)="$event.preventDefault()" style="font-size:14.5px;color:var(--ink-soft);text-decoration:none;">{{ l }}</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);">Get started</div>
+      <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px;">
+        <button (click)="booking = true" [ngStyle]="primaryBtn('sm')">Book free call</button>
+        <button (click)="login = true" [ngStyle]="outlineBtn('sm')">Member log in</button>
+      </div>
+    </div>
+  </div>
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+       margin-top:44px;padding-top:24px;border-top:1px solid var(--line);">
+    <span style="font-size:13.5px;color:var(--ink-soft);">© {{ year }} Rehab &amp; Rise. All rights reserved.</span>
+    <span style="font-size:13.5px;color:var(--ink-soft);">Privacy · Terms</span>
+  </div>
+</footer>
+
+<!-- ===================== MODALS ===================== -->
+<app-booking-modal [open]="booking" (close)="booking = false"></app-booking-modal>
+<app-login-modal [open]="login" (close)="login = false"></app-login-modal>
+<app-checkout-modal [program]="checkout" (close)="checkout = null"
+                    (complete)="afterCheckout()" (bookInstead)="checkoutToBooking()"></app-checkout-modal>
+
+<!-- ===================== SHARED TEMPLATES ===================== -->
+<ng-template #logo>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;
+          color:var(--accent-ink);flex:0 0 auto;"><app-icon name="spark" [size]="19" [stroke]="1.9"/></span>
+    <span class="display" style="font-size:20px;font-weight:600;letter-spacing:-.01em;color:var(--ink);white-space:nowrap;">
+      Rehab <span style="color:var(--accent);">&amp;</span> Rise
+    </span>
+  </div>
+</ng-template>
+
+<ng-template #eyebrow let-text="text">
+  <div style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.14em;
+       text-transform:uppercase;color:var(--accent);">
+    <span style="width:22px;height:1.5px;background:currentColor;opacity:.6;"></span>{{ text }}
+  </div>
+</ng-template>
+
+<ng-template #imgPlaceholder let-label="label" let-ratio="ratio" let-dark="dark">
+  <div [style.aspect-ratio]="ratio || '4 / 5'" [style.border-radius]="'var(--radius-lg)'"
+       [style.border]="'1px solid ' + (dark ? 'rgba(255,255,255,.16)' : 'var(--line)')"
+       [style.background]="(dark
+         ? 'repeating-linear-gradient(135deg,transparent,transparent 9px,rgba(255,255,255,.05) 9px,rgba(255,255,255,.05) 18px),rgba(255,255,255,.03)'
+         : 'repeating-linear-gradient(135deg,transparent,transparent 9px,rgba(0,0,0,.035) 9px,rgba(0,0,0,.035) 18px),var(--surface-2)')"
+       style="display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <span [style.color]="dark ? 'rgba(255,255,255,.5)' : 'var(--ink-soft)'"
+          [style.background]="dark ? 'rgba(0,0,0,.25)' : 'var(--surface)'"
+          [style.border]="'1px solid ' + (dark ? 'rgba(255,255,255,.12)' : 'var(--line)')"
+          style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12.5px;letter-spacing:.04em;padding:5px 11px;border-radius:6px;">{{ label }}</span>
+  </div>
+</ng-template>

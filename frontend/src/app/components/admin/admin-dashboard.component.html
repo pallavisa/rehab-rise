@@ -1,0 +1,436 @@
+<div style="display:flex;min-height:100vh;background:var(--bg);">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="dash-sidebar" style="width:248px;flex:0 0 248px;background:var(--surface);border-right:1px solid var(--line);
+         display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+    <div style="padding:22px 22px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);flex:0 0 auto;"><app-icon name="spark" [size]="19" [stroke]="1.9"/></span>
+        <span style="min-width:0;">
+          <span class="display" style="font-size:18px;font-weight:600;letter-spacing:-.01em;color:var(--ink);display:block;line-height:1.1;white-space:nowrap;">Rehab <span style="color:var(--accent);">&amp;</span> Rise</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);">Coach studio</span>
+        </span>
+      </div>
+    </div>
+    <nav style="padding:6px 14px;display:flex;flex-direction:column;gap:3px;flex:1;">
+      <button *ngFor="let it of nav" (click)="setView(it.id)"
+        [style.background]="view === it.id ? 'var(--primary)' : 'transparent'"
+        [style.color]="view === it.id ? 'var(--primary-ink)' : 'var(--ink-soft)'"
+        style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;border:none;cursor:pointer;
+        font-family:inherit;font-size:15px;font-weight:600;text-align:left;">
+        <app-icon [name]="it.icon" [size]="19"/>{{ it.label }}
+        <span *ngIf="it.id === 'bookings' && newBookings > 0" style="margin-left:auto;font-size:11.5px;font-weight:700;
+          background:var(--accent);color:var(--accent-ink);border-radius:999px;min-width:19px;height:19px;padding:0 6px;display:grid;place-items:center;">{{ newBookings }}</span>
+      </button>
+    </nav>
+    <div style="padding:14px;border-top:1px solid var(--line);">
+      <div style="display:flex;align-items:center;gap:11px;padding:8px 10px;">
+        <span style="width:38px;height:38px;border-radius:999px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto;font-weight:700;font-size:14px;">JR</span>
+        <div style="min-width:0;flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">{{ coachName }}</div>
+          <div style="font-size:12.5px;color:var(--ink-soft);">Coach</div>
+        </div>
+      </div>
+      <button (click)="logout()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-top:4px;
+        color:var(--ink-soft);background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;width:100%;text-align:left;">
+        <app-icon name="logout" [size]="18"/> Log out</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="dash-main" style="flex:1;min-width:0;padding:30px clamp(20px,4vw,44px) 90px;">
+    <div style="max-width:1080px;margin:0 auto;">
+      <!-- topbar -->
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap;">
+        <div>
+          <h1 class="display" style="font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--ink);margin:0;letter-spacing:-.02em;">{{ topTitle }}</h1>
+          <p style="margin:6px 0 0;font-size:15.5px;color:var(--ink-soft);">{{ topSub }}</p>
+        </div>
+      </div>
+
+      <!-- ====== OVERVIEW ====== -->
+      <div *ngIf="view === 'overview'" style="display:flex;flex-direction:column;gap:20px;">
+        <div class="metric-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div *ngFor="let m of stats" [ngStyle]="card(20)">
+            <span style="width:38px;height:38px;border-radius:10px;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;margin-bottom:14px;"><app-icon [name]="m.icon" [size]="20"/></span>
+            <div class="display" style="font-size:28px;font-weight:600;color:var(--ink);letter-spacing:-.02em;">{{ m.value }}</div>
+            <div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-top:6px;">{{ m.label }}</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">{{ m.note }}</div>
+          </div>
+        </div>
+
+        <div class="overview-cols" style="display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start;">
+          <div [ngStyle]="card()">
+            <div [ngStyle]="cardTitleRow"><h3 [ngStyle]="cardTitle">New bookings</h3>
+              <button (click)="setView('bookings')" [ngStyle]="linkBtn">All bookings</button></div>
+            <div *ngIf="newBookingList.length; else noNew" style="display:flex;flex-direction:column;gap:14px;">
+              <div *ngFor="let b of newBookingList" style="padding:14px 16px;border-radius:12px;border:1px solid var(--line);">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                  <span style="font-size:15px;font-weight:600;color:var(--ink);">{{ b.name }}</span>
+                  <span [ngStyle]="pill('accent')">New</span>
+                </div>
+                <div style="font-size:13px;color:var(--ink-soft);margin:6px 0 10px;">{{ relDay(b.start) }} · {{ fmtTime(b.start) }} · {{ b.interest }}</div>
+                <div style="display:flex;gap:8px;">
+                  <button (click)="confirmBooking(b.id)" [ngStyle]="darkBtn('sm')">Confirm</button>
+                  <button (click)="setView('bookings')" [ngStyle]="ghostBtn()">View</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noNew><p style="margin:0;color:var(--ink-soft);font-size:14.5px;">No new bookings right now.</p></ng-template>
+          </div>
+
+          <div [ngStyle]="card()">
+            <div [ngStyle]="cardTitleRow"><h3 [ngStyle]="cardTitle">Active clients</h3>
+              <button (click)="setView('clients')" [ngStyle]="linkBtn">All clients</button></div>
+            <button *ngFor="let c of activeClients; let i = index" (click)="setView('clients'); openClient(c.id)"
+              [style.border-top]="i ? '1px solid var(--line)' : 'none'"
+              style="display:flex;align-items:center;gap:14px;padding:13px 0;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;width:100%;">
+              <span style="width:40px;height:40px;border-radius:999px;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:14px;flex:0 0 auto;">{{ c.avatar }}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:600;color:var(--ink);">{{ c.name }}</div>
+                <div style="font-size:13px;color:var(--ink-soft);">{{ c.program }}</div>
+              </div>
+              <span style="font-size:13px;color:var(--ink-soft);">{{ c.files.length }} files</span>
+              <app-icon name="chevron" [size]="18"/>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== PROGRAMS ====== -->
+      <div *ngIf="view === 'programs'" style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <p style="margin:0;font-size:14px;color:var(--ink-soft);max-width:560px;">Changes here update the public marketing site immediately. Active programs appear in the Programs grid; the bundle shows in the highlighted strip.</p>
+          <button (click)="newProgram()" [ngStyle]="darkBtn()"><app-icon name="plus" [size]="17"/> New program</button>
+        </div>
+
+        <div class="metric-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+          <div *ngFor="let p of programs" [ngStyle]="card()" [style.opacity]="p.active ? 1 : 0.55">
+            <div style="display:flex;align-items:flex-start;gap:13px;">
+              <span style="width:46px;height:46px;border-radius:12px;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;flex:0 0 auto;"><app-icon [name]="iconForProgram[p.id] || 'spark'" [size]="22"/></span>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <h3 class="display" style="font-size:19px;font-weight:600;color:var(--ink);margin:0;">{{ p.name }}</h3>
+                  <span *ngIf="p.accent" [ngStyle]="pill('accent')">Popular</span>
+                  <span *ngIf="p.bundle" [ngStyle]="pill('primary')">Bundle</span>
+                  <span *ngIf="!p.active" [ngStyle]="pill('neutral')">Hidden</span>
+                </div>
+                <div style="font-size:13px;color:var(--ink-soft);margin-top:2px;">{{ p.tag }} · £{{ p.price }} {{ p.cadence }}</div>
+              </div>
+            </div>
+            <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0;">{{ p.summary }}</p>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+              <button (click)="editProgram(p)" [ngStyle]="ghostBtn()">Edit</button>
+              <button (click)="deleteProgram(p)" [ngStyle]="ghostBtn()" style="color:var(--accent);">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== AVAILABILITY ====== -->
+      <div *ngIf="view === 'availability'" style="display:flex;flex-direction:column;gap:20px;">
+        <div [ngStyle]="card()">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+            <div>
+              <h3 class="display" style="font-size:18px;font-weight:600;color:var(--ink);margin:0;">This week's availability</h3>
+              <p style="margin:5px 0 0;font-size:13.5px;color:var(--ink-soft);">Tap a slot to open or close it. Saving regenerates your public free-call calendar.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span *ngIf="!templateSaved" style="font-size:13px;color:var(--accent);font-weight:600;">Unsaved changes</span>
+              <button (click)="saveTemplate()" [ngStyle]="darkBtn('sm')">{{ templateSaved ? 'Saved' : 'Save' }}<app-icon *ngIf="templateSaved" name="check" [size]="16" [stroke]="2.4"/></button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <div style="min-width:540px;">
+              <div style="display:grid;grid-template-columns:64px repeat(5,1fr);gap:8px;">
+                <div></div>
+                <div *ngFor="let d of weekDays; let i = index" [style.opacity]="weekDateState(i) === 'past' ? .45 : 1" style="text-align:center;padding-bottom:6px;">
+                  <div [style.color]="weekDateState(i) === 'today' ? 'var(--accent)' : 'var(--ink)'" style="font-size:13px;font-weight:700;">{{ d }}</div>
+                  <div style="font-size:11px;font-weight:600;color:var(--ink-soft);margin-top:1px;">{{ weekDateState(i) === 'today' ? 'Today' : weekDateNum(i) }}</div>
+                </div>
+                <ng-container *ngFor="let t of timeRows">
+                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;padding-right:6px;">
+                    <button (click)="removeTimeRow(t)" title="Remove time slot" style="background:none;border:none;cursor:pointer;color:var(--ink-soft);padding:2px;line-height:1;font-size:14px;opacity:.5;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.5'">✕</button>
+                    <span style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">{{ t }}</span>
+                  </div>
+                  <ng-container *ngFor="let d of weekDays; let i = index">
+                    <div *ngIf="weekDateState(i) === 'past'" aria-hidden="true" style="border-radius:10px;min-height:48px;border:1px solid transparent;background:color-mix(in srgb,var(--surface-2) 60%,transparent);display:grid;place-items:center;color:color-mix(in srgb,var(--ink-soft) 35%,transparent);font-size:12.5px;">·</div>
+                    <button *ngIf="weekDateState(i) !== 'past'" (click)="toggleSlot(d, t, i)"
+                      [style.border]="template[d] && template[d][t] ? '1px solid color-mix(in srgb,var(--accent) 35%,transparent)' : '1px dashed var(--line)'"
+                      [style.background]="template[d] && template[d][t] ? 'var(--accent-soft)' : 'var(--surface)'"
+                      [style.color]="template[d] && template[d][t] ? 'var(--accent)' : 'color-mix(in srgb,var(--ink-soft) 60%,transparent)'"
+                      style="border-radius:10px;min-height:48px;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;">
+                      {{ template[d] && template[d][t] ? 'Open' : '—' }}
+                    </button>
+                  </ng-container>
+                </ng-container>
+              </div>
+              <!-- Add time slot row -->
+              <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+                <span style="font-size:13px;font-weight:600;color:var(--ink-soft);white-space:nowrap;">Add time slot</span>
+                <input type="time" [(ngModel)]="newTimeInput" style="font-family:inherit;font-size:13.5px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);outline:none;" />
+                <button (click)="addTimeRow()" [ngStyle]="ghostBtn('sm')" [disabled]="!newTimeInput">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div [ngStyle]="card()" style="display:flex;align-items:center;gap:13px;">
+          <span style="width:40px;height:40px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;flex:0 0 auto;"><app-icon name="video" [size]="20"/></span>
+          <div style="font-size:14px;color:var(--ink-soft);line-height:1.5;">Open slots appear on your public booking page and the free-call calendar. When someone books, the slot locks and a Google Meet link is generated automatically.</div>
+        </div>
+      </div>
+
+      <!-- ====== BOOKINGS ====== -->
+      <div *ngIf="view === 'bookings'" style="display:flex;flex-direction:column;gap:20px;">
+        <div *ngFor="let g of [{key:'new',label:'Awaiting confirmation'},{key:'confirmed',label:'Confirmed'}]">
+          <ng-container *ngIf="bookingGroup(g.key).length">
+            <div style="display:flex;align-items:center;gap:10px;margin:0 4px 12px;">
+              <h3 class="display" style="font-size:17px;font-weight:600;color:var(--ink);margin:0;">{{ g.label }}</h3>
+              <span style="font-size:13px;font-weight:700;color:var(--ink-soft);background:var(--surface-2);border-radius:999px;padding:2px 9px;">{{ bookingGroup(g.key).length }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div *ngFor="let b of bookingGroup(g.key)" [ngStyle]="card(0)" style="overflow:hidden;">
+                <div class="booking-row" style="display:grid;grid-template-columns:84px 1fr auto;gap:18px;align-items:center;padding:18px 22px;">
+                  <div style="text-align:center;border-right:1px solid var(--line);padding-right:18px;">
+                    <div style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;">{{ relDay(b.start) }}</div>
+                    <div class="display" style="font-size:22px;font-weight:600;color:var(--ink);line-height:1.1;margin-top:2px;">{{ fmtTime(b.start) }}</div>
+                    <div style="font-size:11.5px;color:var(--ink-soft);">{{ b.mins }} min</div>
+                  </div>
+                  <div style="min-width:0;">
+                    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+                      <span style="font-size:16px;font-weight:600;color:var(--ink);">{{ b.name }}</span>
+                      <span *ngIf="b.status === 'new'" [ngStyle]="pill('accent')">New</span>
+                      <span *ngIf="b.status === 'confirmed'" [ngStyle]="pill('good')">Confirmed</span>
+                      <span [ngStyle]="pill('neutral')">{{ b.interest }}</span>
+                    </div>
+                    <p *ngIf="b.note" style="margin:8px 0 10px;font-size:14px;color:var(--ink-soft);line-height:1.5;">"{{ b.note }}"</p>
+                    <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--ink-soft);">
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><app-icon name="mail" [size]="15"/> {{ b.email }}</span>
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><app-icon name="phone" [size]="15"/> {{ b.phone }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;min-width:130px;">
+                    <button *ngIf="b.status === 'new'" (click)="confirmBooking(b.id)" [ngStyle]="darkBtn('sm')">Confirm &amp; send Meet</button>
+                    <a *ngIf="b.status === 'confirmed'" [href]="'https://' + b.meet" target="_blank" [ngStyle]="primaryBtn('sm')" style="text-decoration:none;">Join<app-icon name="video" [size]="16"/></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- ====== CLIENTS (list) ====== -->
+      <div *ngIf="view === 'clients' && !selectedClient" style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="position:relative;flex:1 1 260px;max-width:360px;">
+            <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-soft);"><app-icon name="user" [size]="17"/></span>
+            <input [(ngModel)]="clientQuery" placeholder="Search clients…" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:14.5px;padding:11px 14px 11px 38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);outline:none;" />
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button *ngFor="let f of [['all','All'],['active','Active'],['lapsed','Lapsed']]" (click)="clientFilter = f[0]"
+              [style.background]="clientFilter === f[0] ? 'var(--primary)' : 'var(--surface)'"
+              [style.color]="clientFilter === f[0] ? 'var(--primary-ink)' : 'var(--ink-soft)'"
+              [style.border]="'1px solid ' + (clientFilter === f[0] ? 'transparent' : 'var(--line)')"
+              style="padding:9px 15px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;">{{ f[1] }}</button>
+          </div>
+        </div>
+        <div class="client-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+          <button *ngFor="let c of filteredClients" (click)="openClient(c.id)" style="text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:center;gap:13px;">
+              <span [style.background]="c.status === 'Active' ? 'var(--primary-soft)' : 'var(--surface-2)'" [style.color]="c.status === 'Active' ? 'var(--primary)' : 'var(--ink-soft)'" style="width:46px;height:46px;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:16px;flex:0 0 auto;">{{ c.avatar }}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:16px;font-weight:600;color:var(--ink);">{{ c.name }}</div>
+                <div style="font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.email }}</div>
+              </div>
+              <span [ngStyle]="c.status === 'Active' ? pill('good') : pill('neutral')">{{ c.status }}</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:13px;">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--ink);">{{ c.program }}</div>
+                <div style="font-size:12.5px;color:var(--ink-soft);">{{ c.files.length }} files</div>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--accent);">Open <app-icon name="chevron" [size]="16"/></span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====== CLIENT DETAIL ====== -->
+      <div *ngIf="view === 'clients' && selectedClient as c" style="display:flex;flex-direction:column;gap:20px;">
+        <button (click)="backToClients()" style="background:none;border:none;cursor:pointer;font-family:inherit;color:var(--ink-soft);font-size:14px;display:flex;align-items:center;gap:6px;padding:0;align-self:flex-start;"><app-icon name="chevronL" [size]="16"/> All clients</button>
+
+        <div [ngStyle]="card()">
+          <div style="display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;">
+            <span style="width:60px;height:60px;border-radius:999px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:700;font-size:22px;flex:0 0 auto;">{{ c.avatar }}</span>
+            <div style="flex:1;min-width:200px;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h2 class="display" style="font-size:24px;font-weight:600;color:var(--ink);margin:0;">{{ c.name }}</h2>
+                <span [ngStyle]="c.status === 'Active' ? pill('good') : pill('neutral')">{{ c.status }}</span>
+              </div>
+              <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:13.5px;color:var(--ink-soft);">
+                <span style="display:inline-flex;align-items:center;gap:6px;"><app-icon name="mail" [size]="15"/> {{ c.email }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><app-icon name="phone" [size]="15"/> {{ c.phone }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="client-meta" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line);">
+            <div><div [ngStyle]="metaK">Program</div><div [ngStyle]="metaV">{{ c.program }}</div></div>
+            <div><div [ngStyle]="metaK">Member since</div><div [ngStyle]="metaV">{{ c.joined }}</div></div>
+            <div><div [ngStyle]="metaK">Last paid</div><div [ngStyle]="metaV">{{ c.paid }}</div></div>
+            <div><div [ngStyle]="metaK">Files</div><div [ngStyle]="metaV">{{ c.files.length }}</div></div>
+          </div>
+        </div>
+
+        <!-- training plan builder -->
+        <div [ngStyle]="card()">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+            <div>
+              <h3 class="display" style="font-size:18px;font-weight:600;color:var(--ink);margin:0;">Training plan</h3>
+              <p style="margin:5px 0 0;font-size:13.5px;color:var(--ink-soft);">Build sessions once and pick which days each runs. {{ c.name.split(' ')[0] }}'s dashboard shows the right session automatically.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span *ngIf="planDirty" style="font-size:13px;color:var(--accent);font-weight:600;">Unsaved</span>
+              <button (click)="savePlan()" [ngStyle]="darkBtn('sm')">{{ planDirty ? 'Save plan' : 'Saved' }}<app-icon *ngIf="!planDirty" name="check" [size]="16" [stroke]="2.4"/></button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div *ngFor="let s of plan.sessions" style="border:1px solid var(--line);border-radius:12px;overflow:hidden;"
+                 [style.background]="sessionOnToday(s) ? 'color-mix(in srgb,var(--accent-soft) 45%,var(--surface))' : 'var(--surface)'">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">
+                <button (click)="toggleSessionOpen(s.id)" aria-label="Expand" [style.transform]="openSession === s.id ? 'rotate(90deg)' : 'none'" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink);flex:0 0 auto;transition:transform .15s;"><app-icon name="chevron" [size]="16"/></button>
+                <input [(ngModel)]="s.title" (ngModelChange)="markPlanDirty()" style="font-family:inherit;font-weight:600;font-size:15px;flex:1;border:1px solid transparent;background:transparent;padding:6px 8px;border-radius:9px;color:var(--ink);outline:none;" />
+                <span style="font-size:12.5px;color:var(--ink-soft);flex:0 0 auto;">{{ s.exercises.length }} exercises</span>
+                <span *ngIf="sessionOnToday(s)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--accent);color:var(--accent-ink);flex:0 0 auto;"><app-icon name="check" [size]="12" [stroke]="2.6"/> On today</span>
+                <button (click)="removeSession(s.id)" aria-label="Remove" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink-soft);flex:0 0 auto;"><app-icon name="close" [size]="15"/></button>
+              </div>
+              <div *ngIf="openSession === s.id" style="padding:0 14px 14px;border-top:1px solid var(--line);">
+                <div style="display:flex;gap:18px;margin:12px 0 6px;flex-wrap:wrap;align-items:center;">
+                  <label style="font-size:12.5px;color:var(--ink-soft);display:flex;align-items:center;gap:8px;">Est. time
+                    <input [(ngModel)]="s.est" (ngModelChange)="markPlanDirty()" style="font-family:inherit;font-size:14px;padding:6px 9px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);outline:none;width:90px;" /></label>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:12.5px;color:var(--ink-soft);">Runs on</span>
+                    <div style="display:flex;gap:4px;">
+                      <button *ngFor="let dc of dowChips" (click)="toggleDay(s, dc[1])"
+                        [style.background]="s.days.includes(dc[1]) ? 'var(--primary)' : 'var(--surface)'"
+                        [style.color]="s.days.includes(dc[1]) ? 'var(--primary-ink)' : 'var(--ink-soft)'"
+                        [style.border]="'1px solid ' + (s.days.includes(dc[1]) ? 'transparent' : 'var(--line)')"
+                        style="width:32px;height:32px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;">{{ dc[0] }}</button>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="!s.days.length" style="font-size:12.5px;color:var(--accent);margin-bottom:8px;">Pick at least one day so this session appears for {{ c.name.split(' ')[0] }}.</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div *ngFor="let ex of s.exercises" class="exercise-row" style="display:grid;grid-template-columns:1.4fr 1fr 1.6fr auto;gap:8px;align-items:center;">
+                    <input [(ngModel)]="ex.name" (ngModelChange)="markPlanDirty()" placeholder="Exercise" [ngStyle]="planInput" />
+                    <input [(ngModel)]="ex.detail" (ngModelChange)="markPlanDirty()" placeholder="Sets × reps" [ngStyle]="planInput" />
+                    <input [(ngModel)]="ex.video" (ngModelChange)="markPlanDirty()" placeholder="Video link" [ngStyle]="planInput" />
+                    <button (click)="removeExercise(s, ex.id)" aria-label="Remove" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink-soft);flex:0 0 auto;"><app-icon name="close" [size]="15"/></button>
+                  </div>
+                </div>
+                <button (click)="addExercise(s)" style="margin-top:10px;display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;border:1px dashed var(--line);background:var(--surface);cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);">+ Add exercise</button>
+              </div>
+            </div>
+          </div>
+          <button (click)="addSession()" style="margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:11px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);"><app-icon name="spark" [size]="16"/> Add session</button>
+        </div>
+
+        <div class="overview-cols" style="display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:start;">
+          <!-- files -->
+          <div [ngStyle]="card()">
+            <div [ngStyle]="cardTitleRow"><h3 [ngStyle]="cardTitle">Shared files</h3>
+              <button (click)="fileInput.click()" [ngStyle]="darkBtn('sm')"><app-icon name="download" [size]="16" [style]="{transform:'rotate(180deg)'}"/> Attach file</button></div>
+            <input #fileInput type="file" multiple style="display:none;" (change)="onFilePick($event)" />
+            <div (dragover)="$event.preventDefault()" (drop)="onDrop($event)" (click)="fileInput.click()"
+                 style="border:1.5px dashed var(--line);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin-bottom:16px;">
+              <div style="color:var(--ink-soft);display:flex;justify-content:center;margin-bottom:6px;"><app-icon name="download" [size]="22" [style]="{transform:'rotate(180deg)'}"/></div>
+              <div style="font-size:14px;font-weight:600;color:var(--ink);">Drop a file here, or click to browse</div>
+              <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px;">Plans, videos, reports — instantly visible to {{ c.name.split(' ')[0] }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;">
+              <div *ngFor="let f of reversedFiles; let i = index" style="display:flex;align-items:center;gap:13px;padding:12px 0;" [style.border-top]="i ? '1px solid var(--line)' : 'none'">
+                <span [style.background]="f.ext === 'mp4' ? 'var(--primary-soft)' : 'var(--accent-soft)'" [style.color]="f.ext === 'mp4' ? 'var(--primary)' : 'var(--accent)'" style="width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;"><app-icon [name]="f.ext === 'mp4' ? 'play' : 'file'" [size]="19"/></span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:14.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.name }}</div>
+                  <div style="font-size:12.5px;color:var(--ink-soft);">{{ f.kind }} · {{ f.size }} · {{ relDay(f.added) }}</div>
+                </div>
+                <a [href]="downloadUrl(f.id)" target="_blank" aria-label="Download" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink);flex:0 0 auto;"><app-icon name="download" [size]="16"/></a>
+                <button (click)="removeFile(f.id)" aria-label="Remove" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink-soft);flex:0 0 auto;"><app-icon name="close" [size]="16"/></button>
+              </div>
+              <p *ngIf="!c.files.length" style="margin:0;font-size:14px;color:var(--ink-soft);text-align:center;padding:10px 0;">No files shared yet.</p>
+            </div>
+          </div>
+
+          <!-- next session + note -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div [ngStyle]="card()">
+              <div [ngStyle]="cardTitleRow"><h3 [ngStyle]="cardTitle">Next session</h3></div>
+              <div *ngIf="c.nextSession; else noSess" style="display:flex;align-items:center;gap:12px;">
+                <span style="width:44px;height:44px;border-radius:11px;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;flex:0 0 auto;"><app-icon name="calendar" [size]="21"/></span>
+                <div>
+                  <div style="font-size:14.5px;font-weight:600;color:var(--ink);">{{ fmtDay(c.nextSession) }}</div>
+                  <div style="font-size:13px;color:var(--ink-soft);">{{ fmtTime(c.nextSession) }} · {{ relDay(c.nextSession) }}</div>
+                </div>
+              </div>
+              <ng-template #noSess><p style="margin:0;font-size:14px;color:var(--ink-soft);">Nothing booked.</p></ng-template>
+            </div>
+            <div [ngStyle]="cardMuted()">
+              <div [ngStyle]="cardTitleRow"><h3 [ngStyle]="cardTitle">Private note</h3></div>
+              <textarea [(ngModel)]="noteDraft" rows="4" [ngStyle]="planInput" style="resize:vertical;width:100%;"></textarea>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+                <span style="font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;"><app-icon name="shield" [size]="14"/> Only visible to you</span>
+                <button (click)="saveNote()" [ngStyle]="ghostBtn()">Save note</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ MOBILE NAV ============ -->
+  <nav class="dash-mobnav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:8px 6px;">
+    <div style="display:flex;justify-content:space-around;">
+      <button *ngFor="let it of nav" (click)="setView(it.id)" [style.color]="view === it.id ? 'var(--primary)' : 'var(--ink-soft)'" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;border:none;background:none;cursor:pointer;font-family:inherit;position:relative;">
+        <app-icon [name]="it.icon" [size]="21"/>
+        <span style="font-size:11px;font-weight:600;">{{ it.label }}</span>
+        <span *ngIf="it.id === 'bookings' && newBookings > 0" style="position:absolute;top:2px;right:8px;width:8px;height:8px;border-radius:999px;background:var(--accent);"></span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- ============ PROGRAM EDITOR MODAL ============ -->
+<div *ngIf="editing" (click)="cancelEdit()" style="position:fixed;inset:0;z-index:100;background:color-mix(in srgb,var(--ink) 55%,transparent);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:clamp(12px,5vh,56px) 16px;overflow-y:auto;">
+  <div (click)="$event.stopPropagation()" style="width:min(560px,100%);background:var(--bg);border-radius:var(--radius-xl);border:1px solid var(--line);box-shadow:0 40px 90px -30px rgba(0,0,0,.5);overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line);background:var(--surface);">
+      <div class="display" style="font-size:18px;font-weight:600;color:var(--ink);">{{ isNewProgram ? 'New program' : 'Edit program' }}</div>
+      <button (click)="cancelEdit()" aria-label="Close" style="width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink);"><app-icon name="close" [size]="18"/></button>
+    </div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:15px;">
+      <div *ngIf="isNewProgram">
+        <label [ngStyle]="lbl">Slug / id <span style="color:var(--ink-soft);font-weight:400;">(lowercase, no spaces)</span></label>
+        <input [(ngModel)]="editing.id" placeholder="e.g. mobility" [ngStyle]="planInput" />
+      </div>
+      <div><label [ngStyle]="lbl">Name</label><input [(ngModel)]="editing.name" placeholder="Recovery Rehab" [ngStyle]="planInput" /></div>
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;"><label [ngStyle]="lbl">Tag</label><input [(ngModel)]="editing.tag" placeholder="Rehabilitation" [ngStyle]="planInput" /></div>
+        <div style="flex:1;"><label [ngStyle]="lbl">Price (£)</label><input type="number" [(ngModel)]="editing.price" [ngStyle]="planInput" /></div>
+        <div style="flex:1;"><label [ngStyle]="lbl">Cadence</label><input [(ngModel)]="editing.cadence" placeholder="/ month" [ngStyle]="planInput" /></div>
+      </div>
+      <div><label [ngStyle]="lbl">Summary</label><textarea [(ngModel)]="editing.summary" rows="3" [ngStyle]="planInput" style="resize:vertical;"></textarea></div>
+      <div><label [ngStyle]="lbl">Features <span style="color:var(--ink-soft);font-weight:400;">(one per line)</span></label>
+        <textarea [(ngModel)]="editingFeatures" rows="4" [ngStyle]="planInput" style="resize:vertical;"></textarea></div>
+      <div *ngIf="editing.bundle"><label [ngStyle]="lbl">Saving label</label><input [(ngModel)]="editing.saving" placeholder="Save £50 / month" [ngStyle]="planInput" /></div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;"><input type="checkbox" [(ngModel)]="editing.accent" /> Most popular</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;"><input type="checkbox" [(ngModel)]="editing.bundle" /> Bundle</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;"><input type="checkbox" [(ngModel)]="editing.active" /> Active (visible on site)</label>
+      </div>
+      <p *ngIf="programError" style="margin:0;font-size:13px;color:var(--accent);">{{ programError }}</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+        <button (click)="cancelEdit()" [ngStyle]="ghostBtn('md')">Cancel</button>
+        <button (click)="saveProgram()" [ngStyle]="darkBtn('md')">{{ isNewProgram ? 'Create' : 'Save changes' }}</button>
+      </div>
+    </div>
+  </div>
+</div>
