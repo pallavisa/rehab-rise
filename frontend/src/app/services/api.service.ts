@@ -5,9 +5,9 @@ import {
   Program, Availability, BookingResult, SubscribeResult,
   AdminProgram, Client, AdminBooking, Stat, MemberOverview, TrainingPlan, ClientFile,
 } from './models';
-import { environment } from '../../environments/environment';
-
-const API = environment.apiUrl;
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:4000/api'
+  : 'https://rehab-rise-production.up.railway.app/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
