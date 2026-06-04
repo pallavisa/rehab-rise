@@ -16,7 +16,17 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:4200' }));
+const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:4200')
+  .split(',').map(o => o.trim());
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.some(o => origin === o || origin.endsWith('.vercel.app'))) {
+      cb(null, true);
+    } else {
+      cb(new Error(`CORS: ${origin} not allowed`));
+    }
+  },
+}));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 
