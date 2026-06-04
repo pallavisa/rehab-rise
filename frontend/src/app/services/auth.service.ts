@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AuthMember } from './models';
 
-const API = 'http://localhost:4000/api';
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:4000/api'
+  : 'https://rehab-rise-production.up.railway.app/api';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
