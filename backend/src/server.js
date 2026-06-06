@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import Stripe from 'stripe';
 import { pool, query } from './db.js';
 
 dotenv.config();
@@ -14,7 +15,56 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+
 const app = express();
+
+// Stripe webhook needs raw body — must be registered BEFORE express.json()
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET || '');
+  } catch (err) {
+    return res.status(400).send(`Webhook error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const { member_name, member_email, program_id } = session.metadata || {};
+    if (member_name && member_email && program_id) {
+      try {
+        const programs = await query('SELECT * FROM programs WHERE id=?', [program_id]);
+        if (programs.length) {
+          const program = programs[0];
+          const password = genPassword();
+          const hash = await bcrypt.hash(password, 10);
+          const joined = new Date().toLocaleString('en-GB', { month: 'short', year: 'numeric' });
+          let memberId;
+          const existing = await query('SELECT id FROM members WHERE email=?', [member_email]);
+          if (existing.length) {
+            memberId = existing[0].id;
+            await query('UPDATE members SET name=?, password_hash=? WHERE id=?', [member_name, hash, memberId]);
+          } else {
+            const r = await query(
+              'INSERT INTO members (name,email,password_hash,is_admin,status,joined) VALUES (?,?,?,0,?,?)',
+              [member_name, member_email, hash, 'Active', joined]);
+            memberId = r.insertId;
+          }
+          const renews = new Date(); renews.setMonth(renews.getMonth() + 1);
+          await query('INSERT INTO subscriptions (member_id,program_id,amount,status,renews_at) VALUES (?,?,?,?,?)',
+            [memberId, program_id, program.price, 'active', renews.toISOString().slice(0, 10)]);
+          await query('INSERT INTO payments (member_id,receipt,period,amount,status,paid_on) VALUES (?,?,?,?,?,?)',
+            [memberId, 'RCT-' + Date.now().toString().slice(-5),
+             new Date().toLocaleString('en-GB', { month: 'long' }),
+             program.price, 'Paid', new Date().toISOString().slice(0, 10)]);
+        }
+      } catch (e) { console.error('Webhook handler error:', e.message); }
+    }
+  }
+  res.json({ received: true });
+});
+
 app.use(express.json());
 const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:4200')
   .split(',').map(o => o.trim());
@@ -421,6 +471,39 @@ app.get('/api/member/overview', auth, async (req, res) => {
         id: p.receipt, date: p.paid_on, amount: p.amount, status: p.status, period: p.period })),
       plan: planRow[0] ? (typeof planRow[0].plan === 'string' ? JSON.parse(planRow[0].plan) : planRow[0].plan) : { sessions: [] },
     });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ===========================================================================
+// STRIPE CHECKOUT
+// ===========================================================================
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { name, email, programId } = req.body || {};
+  if (!name || !email || !programId) return res.status(400).json({ error: 'name, email, programId required' });
+  try {
+    const programs = await query('SELECT * FROM programs WHERE id=?', [programId]);
+    if (!programs.length) return res.status(404).json({ error: 'Program not found' });
+    const program = programs[0];
+    const origin = (req.headers.origin || ALLOWED_ORIGINS[0]).replace(/\/$/, '');
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer_email: email,
+      line_items: [{
+        price_data: {
+          currency: 'gbp',
+          product_data: {
+            name: program.name,
+            description: program.summary || `One month of ${program.name}`,
+          },
+          unit_amount: Math.round(Number(program.price) * 100),
+        },
+        quantity: 1,
+      }],
+      metadata: { member_name: name, member_email: email, program_id: programId },
+      success_url: `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?payment=cancelled`,
+    });
+    res.json({ url: session.url });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

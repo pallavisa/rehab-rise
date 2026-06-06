@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  Program, Availability, BookingResult, SubscribeResult,
+  Program, Availability, BookingResult, SubscribeResult, CheckoutSessionResult,
   AdminProgram, Client, AdminBooking, Stat, MemberOverview, TrainingPlan, ClientFile,
 } from './models';
 const API = window.location.hostname === 'localhost'
@@ -21,6 +21,9 @@ export class ApiService {
   }
   subscribe(body: { name: string; email: string; programId: string }): Observable<SubscribeResult> {
     return this.http.post<SubscribeResult>(`${API}/subscribe`, body);
+  }
+  createCheckoutSession(body: { name: string; email: string; programId: string }): Observable<CheckoutSessionResult> {
+    return this.http.post<CheckoutSessionResult>(`${API}/create-checkout-session`, body);
   }
 
   // ---- admin: programs ----

@@ -23,6 +23,7 @@ export class LandingComponent implements OnInit {
   booking = false;
   login = false;
   checkout: Program | null = null;
+  paymentSuccess = false;
 
   navLinks = [
     { label: 'Programs', id: 'programs' },
@@ -62,6 +63,11 @@ export class LandingComponent implements OnInit {
 
   ngOnInit(): void {
     this.api.getPrograms().subscribe((p) => (this.programs = p));
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      this.paymentSuccess = true;
+      window.history.replaceState({}, '', '/');
+    }
   }
 
   get cards(): Program[] { return this.programs.filter((p) => !p.bundle); }

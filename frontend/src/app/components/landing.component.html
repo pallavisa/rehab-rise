@@ -1,3 +1,9 @@
+<!-- ===================== PAYMENT SUCCESS BANNER ===================== -->
+<div *ngIf="paymentSuccess" style="background:var(--primary,#16a34a);color:#fff;text-align:center;padding:16px 24px;font-size:15px;font-weight:500;line-height:1.4;">
+  Payment received — your account is being set up. Check your email for login details, then
+  <button (click)="paymentSuccess = false; login = true" style="background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;">log in here</button>.
+</div>
+
 <!-- ===================== NAV ===================== -->
 <header [style.background]="scrolled ? 'color-mix(in srgb,var(--bg) 88%,transparent)' : 'transparent'"
         [style.backdrop-filter]="scrolled ? 'saturate(140%) blur(12px)' : 'none'"

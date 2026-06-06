@@ -16,6 +16,7 @@ export type Availability = Record<string, Slot[]>;
 
 export interface BookingResult { ok: boolean; date: string; time: string; meetLink: string; }
 export interface SubscribeResult { ok: boolean; program: string; email: string; devPassword: string; }
+export interface CheckoutSessionResult { url: string; }
 
 // ---- Dashboard models -----------------------------------------------------
 export interface AuthMember { id: number; name: string; email: string; isAdmin: boolean; }
